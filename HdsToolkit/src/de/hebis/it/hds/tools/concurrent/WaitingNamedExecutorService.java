@@ -31,7 +31,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * A waiting ans named {@link ExecutorService}. <br/>
+ * A waiting and named {@link ExecutorService}. <br/>
  * * "waiting" The input queue has is a {@link BlockingQueue} <br/>
  * * "named" The threads handled by this executer get are named to ease debugging.
  * 
