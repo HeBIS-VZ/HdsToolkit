@@ -21,9 +21,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * Static tools to convert, test and compare the ids of the Pica library systems.<br/>
- * - IPN = internal production number (one to eight digits)<br/>
- * - PPN = pica production number (the IPN plus one character as check digit)<br/>
+ * Static tools to convert, test and compare the ids of the Pica library systems.<br>
+ * - IPN = internal production number (one to eight digits)<br>
+ * - PPN = pica production number (the IPN plus one character as check digit)<br>
  * TODO extend for new ids with 10(+1) digits
  * 
  * @author 2014 Uwe
@@ -32,6 +32,11 @@ import org.apache.logging.log4j.Logger;
 public class XPN {
    static final Logger LOG = LogManager.getLogger(XPN.class);
 
+   /**
+    * Private constructor to avoid non static access.
+    */
+   private XPN() {}
+   
    /**
     * Converts a PPN to a IPN
     * 
@@ -114,7 +119,7 @@ public class XPN {
    /**
     * Simple Tests
     * 
-    * @param args
+    * @param args All Parameters are ignored
     */
    public static void main(String[] args) {
       System.out.println(ipnToPpn("1"));

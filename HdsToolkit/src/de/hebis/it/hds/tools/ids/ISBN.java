@@ -36,7 +36,8 @@ public class ISBN {
    /**
     * Constructs new ISBN
     * 
-    * @param isbnString The ISBN as text
+    * @param isbnString A text, which should contain a ISBN.<br>
+    * The instance holds the first found ISBN in the Text.
     */
    public ISBN(String isbnString) {
       if (isbnString == null) throw new NumberFormatException("ISBN: the Parameter is mandatory.");
@@ -56,25 +57,13 @@ public class ISBN {
    }
 
    /**
-    * Builds new ISBN
+    * Factory method that builds new ISBN
     * 
-    * @param isbnString ISBN as text
-    * @return A new ISBN
-    * @throws NumberFormatException
+    * @param isbnString A text, which should contain a ISBN
+    * @return A new ISBN build from the first found 'ISBN' in the Text
     */
-   public static ISBN valueOf(String isbnString) throws NumberFormatException {
+   public static ISBN valueOf(String isbnString) {
       return new ISBN(isbnString);
-   }
-
-   /**
-    * Builds new ISBN
-    * 
-    * @param isbn ISBN as number
-    * @return A new ISBN
-    * @throws NumberFormatException
-    */
-   public static ISBN valueOf(int isbn) throws NumberFormatException {
-      return new ISBN(String.valueOf(isbn));
    }
 
    /**
@@ -107,18 +96,17 @@ public class ISBN {
    }
 
    /**
-    * I the ISBN syntactically correct.
+    * Is the ISBN syntactically correct.
     *
-    * @return TRUE, if is valid
+    * @return TRUE, if the found ISBN is valid.
     */
    public boolean isValid() {
       if (isbnRaw.equals(isbn10) || isbnRaw.equals(isbn13)) return true;
-      // If the checkdigit is wrong.
       return false;
    }
 
    /**
-    * Get the potential wrong ISBN. (see {@link #isbnRaw})
+    * Get the found (potential invalid) ISBN.
     *
     * @return The stripped ISBN found in the original text
     */
@@ -130,7 +118,7 @@ public class ISBN {
    /**
     * Get as ISBN-10
     *
-    * @return Short ISBN with recomputed check digit
+    * @return Short ISBN with recomputed check digit. Or NULL if the ISBN isn't valid
     */
    public String toString10() {
       return isbn10;
@@ -139,7 +127,7 @@ public class ISBN {
    /**
     * Get as ISBN-13
     *
-    * @return Long ISBN with recomputed check digit
+    * @return Long ISBN with recomputed check digit. Or NULL if the ISBN isn't valid
     */
    public String toString13() {
       return isbn13;
@@ -212,7 +200,7 @@ public class ISBN {
    /**
     * Poor man's unit test
     * 
-    * @param args
+    * @param args All Parameters are ignored
     */
    public static void main(String[] args) {
       // Tests

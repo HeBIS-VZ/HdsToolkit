@@ -29,7 +29,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * Simple Parser to find lines, they belongs together, representing an object. (e.g. XML tags)<br/>
+ * Simple Parser to find lines, they belongs together, representing an object. (e.g. XML tags)<br>
  * The detailed behavior is defined by a consumer, which is declared in the constructor.
  * 
  * @author Uwe 23.10.2014 2017-03-22 uh revised
@@ -43,15 +43,15 @@ public class TextBlockSpliterator implements Spliterator<List<String>> {
    private List<String>              block;
 
    /**
-    * Instance a new TextBlockSpliterator.<br/>
-    * ! This spliterator needs to have the markers, identifying a block in <br/>
+    * Instance a new TextBlockSpliterator.<br>
+    * ! This spliterator needs to have the markers, identifying a block in <br>
     * ! different strings and a marker may not distributed over two strings.
     * 
     * @param lines A sequentiell stream of strings (eg. lines of a file)
     * @param startPattern Pattern to identify the first line of a block
     * @param endPattern Pattern to identify the last line of a block
     */
-   TextBlockSpliterator(Spliterator<String> lines, Predicate<String> startPattern, Predicate<String> endPattern) {
+   public TextBlockSpliterator(Spliterator<String> lines, Predicate<String> startPattern, Predicate<String> endPattern) {
       source = lines;
       start = startPattern;
       end = endPattern;

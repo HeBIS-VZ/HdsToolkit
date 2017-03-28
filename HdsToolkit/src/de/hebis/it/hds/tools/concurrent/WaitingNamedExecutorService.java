@@ -31,8 +31,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * A waiting and named {@link ExecutorService}. <br/>
- * * "waiting" The input queue has is a {@link BlockingQueue} <br/>
+ * A waiting and named {@link ExecutorService}. <br>
+ * * "waiting" The input queue has is a {@link BlockingQueue} <br>
  * * "named" The threads handled by this executer get are named to ease debugging.
  * 
  * @author Uwe 20.05.2016
@@ -84,6 +84,8 @@ public class WaitingNamedExecutorService implements ThreadFactory {
     * Take a new {@link Callable}. Calls {@link ExecutorService#submit(Callable)}
     * 
     * @param task The callable
+    * @param <T> T - the type of the task's result
+    * 
     * @return Der A Future oft the callables result or NULL if the callable couldn't be taken.
     */
    public synchronized <T> Future<T> submit(Callable<T> task) {
@@ -101,7 +103,7 @@ public class WaitingNamedExecutorService implements ThreadFactory {
    }
 
    /**
-    * Notify the executor service to shutdown.<br/>
+    * Notify the executor service to shutdown.<br>
     * Differing to {@link ExecutorService#shutdown()} this method is waiting, till all tasks are finished.
     * 
     */
@@ -152,10 +154,12 @@ public class WaitingNamedExecutorService implements ThreadFactory {
    }
 
    /**
-    * Extension of the {@link Executors#defaultThreadFactory()} to set the name of the tasks.<br/>
-    * Instead of 'pool-#-thread-#' the name will be 'myName-#'. This method is implicitly called by {@link #execute(Runnable)} and {@link #submit(Callable)}
+    * Extension of the {@link Executors#defaultThreadFactory()} to set the name of the threads.<br>
+    * Instead of 'pool-#-thread-#' the name will be 'executorName-#'. (see {@link #WaitingNamedExecutorService}) <br>
+    * This method is implicitly called by {@link #execute(Runnable)} and {@link #submit(Callable)}
     * 
     * @param task the new Task
+    * @return The named Thread
     */
    @Override
    public Thread newThread(Runnable task) {

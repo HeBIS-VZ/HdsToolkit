@@ -36,7 +36,9 @@ import org.marc4j.marc.Record;
 import org.marc4j.marc.VariableField;
 
 /**
- * Addon to Marc4j to work with also with Strings (instead of character streams, java.io.*).<br>
+ * Wrapper to Marc4J.<br>
+ * The original Marc4J handles only with (java.io.*)character streams.<br>
+ * This wrapper adds methods to work also with strings.
  * 
  * @author 2016-05-01 Uwe Reh, HeBIS-IT
  * @version 2016-09-26 uh changed all methods to 'static'.
@@ -49,7 +51,7 @@ public class MarcWrapper {
 
    /**
     * Prepare a converter for the use in a {@link MarcWriter}.<br/>
-    * The converter uses {@link Normalizer#normalize(CharSequence, java.text.Normalizer.Form)} to get {@link Normalizer.Form.NFC} 
+    * The converter uses {@link Normalizer#normalize(CharSequence, java.text.Normalizer.Form)} to get {@link Normalizer.Form.NFC}
     *
     */
    private static class NormalizeToNFC extends CharConverter {
@@ -60,10 +62,10 @@ public class MarcWrapper {
    }
 
    /**
-    * Writes a record to a String. (@see org.marc4j.MarcStreamWriter)
+    * Converts a {@link Record} to ISO 2709
     * 
-    * @param marc The record to write
-    * @return The String representation of the record (ISO 2709), or 'NULL' in case of an error.
+    * @param marc The record to convert
+    * @return The the record as string, or 'NULL' in case of an conversion error.
     */
    public static String marcToString(Record marc) {
       try {
@@ -80,25 +82,32 @@ public class MarcWrapper {
    }
 
    /**
-    * A simple replacement for {@link Record}.toString() 
+    * Converts a {@link Record} to marcXML
     * 
-    * @param marc The record to pretty print
-    * @return A readable representation of the record, or "" in case of an error.
+    * @param marc The record to convert.
+    * @return The record as string. (MarcXML)
     */
-   public static String marcToText(Record marc) {
-      StringBuilder out = new StringBuilder();
-      for (Object obj : marc.getVariableFields()) {
-         VariableField feld = (VariableField) obj;
-         out.append(feld.toString());
-         out.append('\n');
+   public static String marc2XML(Record marc) {
+      if (marc == null) return null;
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      MarcXmlWriter xmlWriter = new MarcXmlWriter(baos, true);
+      xmlWriter.write(marc);
+      xmlWriter.close();
+      String ret = "";
+      try {
+         ret = baos.toString("UTF-8");
+      } catch (UnsupportedEncodingException e) {
+         throw new RuntimeException("Should never Happens.", e);
       }
-      return out.toString();
+      int startPos = ret.indexOf("<record>") - 2;
+      int endPos = ret.indexOf("</collection>") - 1;
+      return ret.substring(startPos, endPos);
    }
 
    /**
-    * Reads a record from a string
+    * Reads a record from a string (ISO 2709)
     * 
-    * @param data A string repesentating the record (ISO 2709).
+    * @param data The record as string. (formated according ISO 2709)
     * @return The first record found in the string. Or NULL, if no record could be found.
     */
    public static Record string2Marc(String data) {
@@ -113,6 +122,17 @@ public class MarcWrapper {
       }
    }
 
+   /**
+    * Converts the record, given as string in (ISO 2709) to marcXML
+    * 
+    * @param raw The record as string. (formated according ISO 2709)
+    * @return The record as string. (MarcXML)
+    */
+   public static String string2XML(String raw) {
+      return marc2XML(string2Marc(raw));
+   }
+
+   
    /**
     * Weird filter for encoded characters and control characters.<br/>
     * TODO 'get rid of'
@@ -136,6 +156,7 @@ public class MarcWrapper {
 
    /**
     * Helper to {@link #normalizeUnicode(String)}
+    * 
     * @param charCodePoint A string with 'suspect' data
     * @return a replacement for the input.
     */
@@ -152,36 +173,21 @@ public class MarcWrapper {
    }
 
    /**
-    * Converts a record in ISO 2709 to marcXML
+    * A simple alternative for {@link Record}.toString()<br>
+    * Only used for debugging.
     * 
-    * @param raw The record as string. (formated according ISO 2709)
-    * @return The record in XML representation
+    * @param marc The record to pretty print
+    * @return A readable representation of the record, or "" in case of an error.
     */
-   public static String string2XML(String raw) {
-      return marc2XML(string2Marc(raw));
-   }
-
-   /**
-    * Converts a record in marcXML to ISO 2709
-    * 
-    * @param marc The record as XML.
-    * @return The record formated according ISO 2709
-    */
-   public static String marc2XML(Record marc) {
-      if (marc == null) return null;
-      ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      MarcXmlWriter xmlWriter = new MarcXmlWriter(baos, true);
-      xmlWriter.write(marc);
-      xmlWriter.close();
-      String ret = "";
-      try {
-         ret = baos.toString("UTF-8");
-      } catch (UnsupportedEncodingException e) {
-         throw new RuntimeException("Should never Happens.", e);
+   @SuppressWarnings("unused")
+   private static String marcPrettyPrinter(Record marc) {
+      StringBuilder out = new StringBuilder();
+      for (Object obj : marc.getVariableFields()) {
+         VariableField feld = (VariableField) obj;
+         out.append(feld.toString());
+         out.append('\n');
       }
-      int startPos = ret.indexOf("<record>") - 2;
-      int endPos = ret.indexOf("</collection>") - 1;
-      return ret.substring(startPos, endPos);
+      return out.toString();
    }
 
 }
