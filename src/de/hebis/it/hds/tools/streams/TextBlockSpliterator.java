@@ -27,58 +27,70 @@ import java.util.stream.StreamSupport;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import java.nio.file.Files;
 
 /**
- * Simple Parser to find lines, they belongs together, representing an object. (e.g. XML tags)<br>
+ * Simple spliterator to find blocks of contiguous lines, from a sequential {@link Stream} of Strings<br>
+ * The blocks need to have markers (character sequences) to identify the first and the last line(e.g. XML tags)<br>
  * The detailed behavior is defined by a consumer, which is declared in the constructor.
  * 
- * @author Uwe 23.10.2014 2017-03-22 uh revised
+ * @author Uwe Reh (uh), HeBIS-IT
+ * @version 2014-10-23 uh First try
+ * @version 2017-03-29 uh revised
  */
 public class TextBlockSpliterator implements Spliterator<List<String>> {
    static final Logger               LOG      = LogManager.getLogger(TextBlockSpliterator.class);
    private final Spliterator<String> source;
-   private final Predicate<String>   start, end;
-   private final Consumer<String>    getBlock;
+   private final Predicate<String>   startPattern;
+   private final Predicate<String>   endPattern;
+   private final Consumer<String>    textBlockConsumer;
    private String                    lastLine = "";
-   private List<String>              block;
+   private List<String>              textBlock;
 
    /**
     * Instance a new TextBlockSpliterator.<br>
-    * ! This spliterator needs to have the markers, identifying a block in <br>
-    * ! different strings and a marker may not distributed over two strings.
+    * <dl>
+    * <dt>Limitations</dt>
+    * <dd>The markers may not distributed over two strings/lines.</dd>
+    * <dd>Additional leading or trailing characters are not removed.</dd>
+    * </dl>
     * 
-    * @param lines A sequentiell stream of strings (eg. lines of a file)
+    * @param lines A sequential stream of strings (e.g. {@link Files#lines(java.nio.file.Path)}
     * @param startPattern Pattern to identify the first line of a block
     * @param endPattern Pattern to identify the last line of a block
     */
-   public TextBlockSpliterator(Spliterator<String> lines, Predicate<String> startPattern, Predicate<String> endPattern) {
+   public TextBlockSpliterator(Spliterator<String> lines, Predicate<String> blockStartPattern, Predicate<String> blockEndPattern) {
       source = lines;
-      start = startPattern;
-      end = endPattern;
-      getBlock = line -> {
+      startPattern = blockStartPattern;
+      endPattern = blockEndPattern;
+      // Define the consumer used in tryAdvance
+      textBlockConsumer = line -> {
          lastLine = line;
-         if (block == null) {
-            if (start.test(line)) {
+         if (textBlock == null) { // look for a new block
+            if (startPattern.test(line)) {
+               // begin a new block
                if (LOG.isTraceEnabled()) LOG.trace("start: " + line);
-               block = new ArrayList<>();
-               block.add(line);
+               textBlock = new ArrayList<>();
+               textBlock.add(line);
             } else {
+               // anything outside of the block
                if (LOG.isTraceEnabled()) LOG.trace("noise:" + line);
             }
          } else {
+            // from the startpattern (10 lines above) to the endpattern (tested in tryAdvance) it's content.
             if (LOG.isTraceEnabled()) LOG.trace("newln: " + line);
-            block.add(line);
+            textBlock.add(line);
          }
       };
    }
 
    @Override
    public boolean tryAdvance(Consumer<? super List<String>> action) {
-      while (!end.test(lastLine)) { // Consume lines until the end of a block is found
-         if (!source.tryAdvance(getBlock)) return false;
+      while (!endPattern.test(lastLine)) { // Consume lines until the end of a block is found
+         if (!source.tryAdvance(textBlockConsumer)) return false;
       }
-      action.accept(block); // present found Block
-      block = null; // prepare for next Block
+      action.accept(textBlock); // present found Block
+      textBlock = null; // prepare for next Block
       lastLine = "";
       return true;
    }
@@ -99,7 +111,7 @@ public class TextBlockSpliterator implements Spliterator<List<String>> {
    }
 
    /**
-    * Factory for a new TextBlockSpliterator
+    * Factory for a new stream of text blocks stripped out of a stream of lines
     * 
     * @param lines The {@link Stream} to consume
     * @param blockStartPattern Pattern to identify the start of a block
