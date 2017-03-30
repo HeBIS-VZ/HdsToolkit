@@ -1,5 +1,4 @@
 bin/
-!bin/hdstoolkit.jar
 # eclipse stuff
 .classpath
 .settings
