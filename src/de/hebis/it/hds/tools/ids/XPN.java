@@ -44,8 +44,9 @@ public class XPN {
     * @return The IPN (= stripped PPN, no check digit no leading zeros)
     */
    public static String ppnToIpn(String ppn) {
-      String cleanppn = ppn.trim();
-      return cleanppn.substring(0, cleanppn.length() - 1).replaceFirst("0*", "");
+      String out = ppn.trim(); // clean
+      out = out.substring(0, ppn.length() - 1); // strip check digit 
+      return out.replaceFirst("^0*", ""); // strip leading zeros
    }
 
    /**
