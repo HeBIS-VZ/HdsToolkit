@@ -52,7 +52,7 @@ public class ISBN {
             if (isbn13 != null) isbn10 = shrink();
             break;
          default:
-            LOG.warn("No propper ISBN found in: " + isbnString);
+            throw new NumberFormatException("No propper ISBN found in: " + isbnString);
       }
    }
 
